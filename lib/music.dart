@@ -1,8 +1,13 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:rgb_controller/globals.dart';
 import 'package:rgb_controller/sequence.dart';
 import 'package:rgb_controller/solid_color.dart';
+import 'package:http/http.dart' as http;
 
 import 'devices.dart';
 
@@ -14,7 +19,33 @@ class MusicPage extends StatefulWidget {
 }
 
 class _MusicPageState extends State<MusicPage> {
-  String setButtonText = "Set blinking to the beat";
+  String setButtonText = "Start flashing to music";
+  String checkText = "Check for internet connection";
+  bool showOnline = false;
+  String search = '';
+  bool searched = false;
+  static const Map<String, String> header1 = {
+    'X-RapidAPI-Key': 'a5a4a4c5cfmshba8159a4b7cbc56p1e5e7fjsnf8b5c34e7a23',
+    'X-RapidAPI-Host': 'spotify23.p.rapidapi.com'
+  };
+  static const Map<String, String> header2 = {
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+    'Authorization':
+        'Bearer BQBSbz-GJ9qmo2osof4ZV_r9V1ZEXDdv-hNJVoWPPd50baJ-9kVvGCv7n8xIcwprHnYYt724i7iGgz1IVZwcSEPhZ1rv-Yr1qMm05AnyLTU7Jubutx1hKjXCdeNzwxJqo19rwaJl2_He1USwxSYh6_tkPfuyei7hcVWzfcLtLj9wwdQ'
+  };
+  String title = '';
+  String albumName = '';
+  String cover64 = '';
+  String artist = '';
+  double bmp = -1;
+
+  void setFun() {
+    setState(() {
+      currentState = 'Flashing to music';
+      currColor = Colors.black;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,44 +70,185 @@ class _MusicPageState extends State<MusicPage> {
                     backgroundColor: currColor,
                     automaticallyImplyLeading: false,
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        context.loaderOverlay.show();
-                        await Future.delayed(const Duration(seconds: 2));
-                        // ignore: use_build_context_synchronously
-                        context.loaderOverlay.hide();
-                        setState(() {
-                          currentState = 'Sequence';
-                          currColor = Colors.black;
-                          setButtonText = 'Success!';
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Offline mode: ',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const Text(
+                            'Enter desired BMP: ',
+                            style: TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                          MyCustomForm2(funkcja: setFun),
+                          const Divider(
+                            color: Colors.black,
+                            thickness: 2,
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                bool result = await InternetConnectionChecker()
+                                    .hasConnection;
+                                setState(() {
+                                  if (result) {
+                                    checkText = 'Connected';
+                                    showOnline = true;
+                                  } else {
+                                    checkText = 'Disconnected :( Try again';
+                                    showOnline = false;
+                                  }
+                                });
+                              },
+                              child: Text(checkText),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(setButtonText),
                     ),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        context.loaderOverlay.show();
-                        await Future.delayed(const Duration(seconds: 2));
-                        // ignore: use_build_context_synchronously
-                        context.loaderOverlay.hide();
-                        setState(() {
-                          currentState = 'Sequence';
-                          currColor = Colors.black;
-                          setButtonText = 'Success!';
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                  Visibility(
+                    visible: showOnline,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Online mode: ',
+                            style: TextStyle(
+                              fontSize: 20,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const Text(
+                            'Type name and author of the song: ',
+                            style: TextStyle(
+                              fontSize: 15,
+                            ),
+                          ),
+                          TextField(
+                            onChanged: (value) {
+                              search = value;
+                            },
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              FocusManager.instance.primaryFocus?.unfocus();
+                              final response = await http.get(
+                                  Uri.parse(
+                                      'https://spotify23.p.rapidapi.com/search/?q=$search&type=tracks&offset=0&limit=1&numberOfTopResults=1'),
+                                  headers: header1);
+                              if (response.statusCode == 200) {
+                                Map<String, dynamic> data =
+                                    jsonDecode(response.body);
+                                Map<String, dynamic> data2 = data['tracks'];
+                                List<dynamic> data3 = data2['items'];
+                                Map<String, dynamic> data4 = data3[0];
+                                Map<String, dynamic> data5 = data4['data'];
+                                String id = data5['id'];
+                                title = data5['name'];
+                                Map<String, dynamic> data6 =
+                                    data5['albumOfTrack'];
+                                albumName = data6['name'];
+                                Map<String, dynamic> data7 = data6['coverArt'];
+                                List<dynamic> data8 = data7['sources'];
+                                Map<String, dynamic> data9 = data8[1];
+                                cover64 = data9['url'];
+                                Map<String, dynamic> data10 = data5['artists'];
+                                List<dynamic> data11 = data10['items'];
+                                Map<String, dynamic> data12 = data11[0];
+                                Map<String, dynamic> data13 = data12['profile'];
+                                artist = data13['name'];
+
+                                final response2 = await http.get(
+                                    Uri.parse(
+                                        'https://api.spotify.com/v1/audio-analysis/$id'),
+                                    headers: header2);
+                                if (response2.statusCode == 200) {
+                                  Map<String, dynamic> tada =
+                                      jsonDecode(response2.body);
+                                  Map<String, dynamic> tada2 = tada['track'];
+                                  bmp = tada2['tempo'];
+                                  setState(
+                                    () {
+                                      searched = true;
+                                    },
+                                  );
+                                } else {
+                                  // ignore: avoid_print
+                                  print(jsonDecode(response2.body));
+                                }
+                              } else {
+                                // ignore: avoid_print
+                                print(jsonDecode(response.body));
+                              }
+                            },
+                            child: const Center(
+                              child: Text('Search song for BMP...'),
+                            ),
+                          ),
+                          Visibility(
+                            visible: searched,
+                            child: Column(
+                              children: [
+                                const Text(
+                                  'Result: ',
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Image.network(cover64),
+                                    Center(
+                                      child: Column(
+                                        children: [
+                                          Text('$title - $artist'),
+                                          Text(albumName),
+                                        ],
+                                      ),
+                                    ),
+                                    Text('BMP: $bmp'),
+                                  ],
+                                ),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      context.loaderOverlay.show();
+                                      await Future.delayed(
+                                          const Duration(seconds: 2));
+                                      // ignore: use_build_context_synchronously
+                                      context.loaderOverlay.hide();
+                                      setState(
+                                        () {
+                                          currentState = 'Flashing to music';
+                                          currColor = Colors.black;
+                                          setButtonText = 'Success!';
+                                        },
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Colors.black,
+                                    ),
+                                    child: Text(setButtonText),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      child: Text(setButtonText),
                     ),
                   ),
                 ],
@@ -146,6 +318,57 @@ class _MusicPageState extends State<MusicPage> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class MyCustomForm2 extends StatefulWidget {
+  final void Function() funkcja;
+  const MyCustomForm2({super.key, required this.funkcja});
+
+  @override
+  MyCustomForm2State createState() {
+    return MyCustomForm2State();
+  }
+}
+
+class MyCustomForm2State extends State<MyCustomForm2> {
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            validator: (value) {
+              if (value == null ||
+                  value.isEmpty ||
+                  int.tryParse(value) == null ||
+                  int.parse(value) <= 0) {
+                return 'Invalid input';
+              }
+              return null;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  widget.funkcja();
+                }
+              },
+              child: const Center(
+                child: Text('Pulse in entered BMP.'),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
