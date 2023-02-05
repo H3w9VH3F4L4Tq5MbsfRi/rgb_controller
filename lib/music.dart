@@ -19,7 +19,7 @@ class MusicPage extends StatefulWidget {
 
 class _MusicPageState extends State<MusicPage> {
   static const int currIndex = 2;
-  String setButtonText = "Start flashing to music";
+  String setButtonText = "Start pulsing to music";
   String checkText = "Test internet connection to access online features";
   bool showOnline = false;
   String search = '';
@@ -32,7 +32,7 @@ class _MusicPageState extends State<MusicPage> {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'Authorization':
-        'Bearer BQDXPSuvcFgLM-khftiDv1Omn8porAcGO6fxAuIi02X8Q1l8OdYfVpilg3VwSIA6Nvjto9AR8Z9lob70TL2V-OOeTl9_sHr_83y-6jA_MMJ1PU79XRl0CnSaGfdTnMG0r-ys2TVjPFJxE1K0uFcBsTmEKUmLA_Lv1jhcitN8keVcBAk'
+        'Bearer BQBCetW0yXv8EHHlaUzY6TxWXK7sIdyvcIOE2hynH8wcFEBiZTHwui8VXl5PxITKbCR5Si4PG9fKZyaXv3GLFg0Us-71P6Uhusqv-4v9lsb5Ik1cAblqKR_F5qWOfJ4K4KquyF4HpAzQ1g4FBG5-0y-d7OgT6rJl_yhmDenS7TmM04o'
   };
   String title = '';
   String albumName = '';
@@ -55,7 +55,7 @@ class _MusicPageState extends State<MusicPage> {
     return MaterialApp(
       home: LoaderOverlay(
         child: Scaffold(
-          backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+          backgroundColor: themeColor,
           appBar: AppBar(
             title: const Text('RGB controller'),
             centerTitle: true,
@@ -94,6 +94,8 @@ class _MusicPageState extends State<MusicPage> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: accentColor),
                               onPressed: () async {
                                 bool result = await InternetConnectionChecker()
                                     .hasConnection;
@@ -138,6 +140,8 @@ class _MusicPageState extends State<MusicPage> {
                             },
                           ),
                           ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: accentColor),
                             onPressed: () async {
                               if (search.isNotEmpty) {
                                 setState(() {
@@ -190,17 +194,19 @@ class _MusicPageState extends State<MusicPage> {
                                   } else {
                                     // ignore: use_build_context_synchronously
                                     errorPopUp(
-                                        jsonDecode(response2.body), context);
+                                        jsonDecode(response2.body).toString(),
+                                        context);
                                   }
                                 } else {
                                   // ignore: use_build_context_synchronously
                                   errorPopUp(
-                                      jsonDecode(response.body), context);
+                                      jsonDecode(response.body).toString(),
+                                      context);
                                 }
                               }
                             },
                             child: const Center(
-                              child: Text('Search song for BMP...'),
+                              child: Text('Search song for BPM'),
                             ),
                           ),
                           Visibility(
@@ -232,7 +238,13 @@ class _MusicPageState extends State<MusicPage> {
                                 SizedBox(
                                   width: double.infinity,
                                   child: ElevatedButton(
+                                    style: ElevatedButton.styleFrom(
+                                        backgroundColor: accentColor),
                                     onPressed: () async {
+                                      if (devicesCount <= 0) {
+                                        noDevicesErrorPopUp(context);
+                                        return;
+                                      }
                                       context.loaderOverlay.show();
                                       await Future.delayed(
                                         const Duration(seconds: 2),
@@ -367,44 +379,24 @@ class MyCustomForm2State extends State<MyCustomForm2> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: accentColor),
               onPressed: () {
+                if (devicesCount <= 0) {
+                  noDevicesErrorPopUp(context);
+                  return;
+                }
                 if (_formKey.currentState!.validate()) {
                   FocusManager.instance.primaryFocus?.unfocus();
                   widget.funkcja();
                 }
               },
               child: const Center(
-                child: Text('Pulse in entered BMP.'),
+                child: Text('Pulse in provided tempo'),
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class DialogExample extends StatelessWidget {
-  final String errorCode;
-  const DialogExample({super.key, required this.errorCode});
-
-  @override
-  Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () => showDialog<String>(
-        context: context,
-        builder: (BuildContext context) => AlertDialog(
-          title: const Text('API connection error'),
-          content: Text(errorCode),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () => Navigator.pop(context, 'OK'),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      ),
-      child: const Text('Show Dialog'),
     );
   }
 }

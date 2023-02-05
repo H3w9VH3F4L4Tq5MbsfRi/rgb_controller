@@ -31,7 +31,7 @@ class _SequencePageState extends State<SequencePage> {
     return MaterialApp(
       home: LoaderOverlay(
         child: Scaffold(
-          backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+          backgroundColor: themeColor,
           appBar: AppBar(
             title: const Text('RGB controller'),
             centerTitle: true,
@@ -87,6 +87,8 @@ class _SequencePageState extends State<SequencePage> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: accentColor),
                               onPressed: () {
                                 setState(
                                   () {
@@ -108,7 +110,15 @@ class _SequencePageState extends State<SequencePage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor),
                       onPressed: () async {
+                        if (devicesCount <= 0) {
+                          noDevicesErrorPopUp(context);
+                          return;
+                        } else if (times.isEmpty) {
+                          return;
+                        }
                         context.loaderOverlay.show();
                         await Future.delayed(const Duration(seconds: 2));
                         // ignore: use_build_context_synchronously
@@ -238,6 +248,7 @@ class MyCustomFormState extends State<MyCustomForm> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: accentColor),
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   FocusManager.instance.primaryFocus?.unfocus();
@@ -245,7 +256,7 @@ class MyCustomFormState extends State<MyCustomForm> {
                 }
               },
               child: const Center(
-                child: Text('Add'),
+                child: Text('Add segment'),
               ),
             ),
           ),

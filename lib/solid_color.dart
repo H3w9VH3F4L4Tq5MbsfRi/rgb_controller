@@ -16,14 +16,14 @@ class SolidColorPage extends StatefulWidget {
 
 class _SolidColorPageState extends State<SolidColorPage> {
   static const int currIndex = 0;
-  Color pickedColor = Colors.red;
+  Color pickedColor = accentColor;
   String setButtonText = "Set selected color";
 
   @override
   Widget build(BuildContext context) {
     return LoaderOverlay(
       child: Scaffold(
-        backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+        backgroundColor: themeColor,
         appBar: AppBar(
           title: const Text('RGB controller'),
           centerTitle: true,
@@ -58,6 +58,10 @@ class _SolidColorPageState extends State<SolidColorPage> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () async {
+                      if (devicesCount <= 0) {
+                        noDevicesErrorPopUp(context);
+                        return;
+                      }
                       context.loaderOverlay.show();
                       await Future.delayed(const Duration(seconds: 2));
                       // ignore: use_build_context_synchronously

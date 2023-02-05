@@ -18,10 +18,8 @@ class DevicesPage extends StatefulWidget {
 class _DevicesPageState extends State<DevicesPage> {
   static const int currIndex = 3;
   String setButtonText = "Scan network for avaible devices";
-  bool devicesVisibility = false;
-  List<String> devices = [];
+  bool devicesVisibility = devices.isNotEmpty;
   String baner = 'Avaible devices: ';
-  int devicesCount = 0;
 
   void changeConnectedCount(bool newState) {
     if (newState) {
@@ -44,7 +42,7 @@ class _DevicesPageState extends State<DevicesPage> {
     return MaterialApp(
       home: LoaderOverlay(
         child: Scaffold(
-          backgroundColor: const Color.fromARGB(255, 250, 250, 250),
+          backgroundColor: themeColor,
           appBar: AppBar(
             title: const Text('RGB controller'),
             centerTitle: true,
@@ -65,10 +63,12 @@ class _DevicesPageState extends State<DevicesPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor),
                       onPressed: () async {
                         setState(
                           () {
-                            devices = [];
+                            devices = {};
                             devicesCount = 0;
                           },
                         );
@@ -81,7 +81,8 @@ class _DevicesPageState extends State<DevicesPage> {
                           (HostModel device) {
                             setState(
                               () {
-                                devices.add(device.ip);
+                                //devices.add(device.ip);
+                                devices[device.ip] = false;
                               },
                             );
                           },
@@ -115,7 +116,7 @@ class _DevicesPageState extends State<DevicesPage> {
                                   itemCount: devices.length,
                                   itemBuilder: (context, index) {
                                     return SeqListElem2(
-                                      child: devices[index],
+                                      child: devices.keys.elementAt(index),
                                       funkcja: changeConnectedCount,
                                     );
                                   },
@@ -208,16 +209,16 @@ class SeqListElem2 extends StatefulWidget {
 }
 
 class _SeqListElem2State extends State<SeqListElem2> {
-  bool state = false;
   @override
   Widget build(BuildContext context) {
     return CheckboxListTile(
       title: Text('IP: ${widget.child}'),
-      value: state,
+      activeColor: accentColor,
+      value: devices[widget.child],
       onChanged: (bool? newValue) {
         setState(
           () {
-            state = newValue!;
+            devices[widget.child] = newValue!;
           },
         );
         widget.funkcja(newValue!);
