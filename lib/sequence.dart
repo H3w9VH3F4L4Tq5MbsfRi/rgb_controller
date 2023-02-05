@@ -15,6 +15,13 @@ class SequencePage extends StatefulWidget {
 
 class _SequencePageState extends State<SequencePage> {
   String setButtonText = "Set created sequence";
+  List<int> times = List.generate(0, (index) => index, growable: true);
+
+  void addTime(int time) {
+    setState(() {
+      times.add(time);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +58,9 @@ class _SequencePageState extends State<SequencePage> {
                               fontSize: 20,
                             ),
                           ),
-                          const MyCustomForm(),
+                          MyCustomForm(
+                            funkcja: addTime,
+                          ),
                           const Divider(
                             color: Colors.black,
                             thickness: 2,
@@ -82,8 +91,11 @@ class _SequencePageState extends State<SequencePage> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
-                                times = List.generate(0, (index) => index,
-                                    growable: true);
+                                setState(
+                                  () {
+                                    times = [];
+                                  },
+                                );
                               },
                               child: const Text('Clear sequence'),
                             ),
@@ -186,7 +198,9 @@ class _SequencePageState extends State<SequencePage> {
 }
 
 class MyCustomForm extends StatefulWidget {
-  const MyCustomForm({super.key});
+  final void Function(int) funkcja;
+
+  const MyCustomForm({super.key, required this.funkcja});
 
   @override
   MyCustomFormState createState() {
@@ -224,9 +238,7 @@ class MyCustomFormState extends State<MyCustomForm> {
               onPressed: () {
                 if (_formKey.currentState!.validate()) {
                   FocusManager.instance.primaryFocus?.unfocus();
-                  setState(() {
-                    times.add(time);
-                  });
+                  widget.funkcja(time);
                 }
               },
               child: const Center(
