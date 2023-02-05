@@ -8,6 +8,7 @@ Color currColor = Colors.black;
 const Color themeColor = Color.fromARGB(255, 250, 250, 250);
 Map<String, bool> devices = {};
 int devicesCount = 0;
+const String header = "RGB controller";
 
 void noDevicesErrorPopUp(BuildContext context) {
   showDialog<String>(

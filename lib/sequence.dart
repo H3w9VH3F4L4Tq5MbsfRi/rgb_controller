@@ -33,9 +33,9 @@ class _SequencePageState extends State<SequencePage> {
         child: Scaffold(
           backgroundColor: themeColor,
           appBar: AppBar(
-            title: const Text('RGB controller'),
+            title: const Text(header),
             centerTitle: true,
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: accentColor,
             automaticallyImplyLeading: false,
           ),
           body: SizedBox(
@@ -139,7 +139,7 @@ class _SequencePageState extends State<SequencePage> {
             ),
           ),
           bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: accentColor,
             showSelectedLabels: false,
             showUnselectedLabels: false,
             type: BottomNavigationBarType.fixed,

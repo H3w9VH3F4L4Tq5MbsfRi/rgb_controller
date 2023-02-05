@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:rgb_controller/globals.dart';
-import 'package:rgb_controller/sequence.dart';
-import 'package:rgb_controller/solid_color.dart';
 import 'package:lan_scanner/lan_scanner.dart';
 
-import 'music.dart';
+import 'package:rgb_controller/globals.dart';
+import 'package:rgb_controller/sequence.dart';
+import 'package:rgb_controller/music.dart';
+import 'package:rgb_controller/solid_color.dart';
 
 class DevicesPage extends StatefulWidget {
   const DevicesPage({super.key});
@@ -37,6 +37,35 @@ class _DevicesPageState extends State<DevicesPage> {
     }
   }
 
+  void searchForDevices() async {
+    setState(
+      () {
+        devices = {};
+        devicesCount = 0;
+      },
+    );
+
+    var wifiIP = await (NetworkInfo().getWifiIP());
+    var subnet = ipToCSubnet(wifiIP!);
+    final scanner = LanScanner();
+    final stream = scanner.icmpScan(subnet);
+    stream.listen(
+      (HostModel device) {
+        setState(
+          () {
+            devices[device.ip] = false;
+          },
+        );
+      },
+    );
+    setState(
+      () {
+        currColor = Colors.black;
+        devicesVisibility = true;
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -44,9 +73,9 @@ class _DevicesPageState extends State<DevicesPage> {
         child: Scaffold(
           backgroundColor: themeColor,
           appBar: AppBar(
-            title: const Text('RGB controller'),
+            title: const Text(header),
             centerTitle: true,
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: accentColor,
             automaticallyImplyLeading: false,
           ),
           body: SizedBox(
@@ -65,35 +94,7 @@ class _DevicesPageState extends State<DevicesPage> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                           backgroundColor: accentColor),
-                      onPressed: () async {
-                        setState(
-                          () {
-                            devices = {};
-                            devicesCount = 0;
-                          },
-                        );
-
-                        var wifiIP = await (NetworkInfo().getWifiIP());
-                        var subnet = ipToCSubnet(wifiIP!);
-                        final scanner = LanScanner();
-                        final stream = scanner.icmpScan(subnet);
-                        stream.listen(
-                          (HostModel device) {
-                            setState(
-                              () {
-                                //devices.add(device.ip);
-                                devices[device.ip] = false;
-                              },
-                            );
-                          },
-                        );
-                        setState(
-                          () {
-                            currColor = Colors.black;
-                            devicesVisibility = true;
-                          },
-                        );
-                      },
+                      onPressed: () async => searchForDevices(),
                       child: Text(setButtonText),
                     ),
                   ),
@@ -131,7 +132,7 @@ class _DevicesPageState extends State<DevicesPage> {
             ),
           ),
           bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: accentColor,
             showSelectedLabels: false,
             showUnselectedLabels: false,
             type: BottomNavigationBarType.fixed,

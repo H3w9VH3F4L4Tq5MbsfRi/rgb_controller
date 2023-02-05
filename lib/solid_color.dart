@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hsvcolor_picker/flutter_hsvcolor_picker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+
 import 'package:rgb_controller/globals.dart';
 import 'package:rgb_controller/sequence.dart';
-
-import 'devices.dart';
-import 'music.dart';
+import 'package:rgb_controller/devices.dart';
+import 'package:rgb_controller/music.dart';
 
 class SolidColorPage extends StatefulWidget {
   const SolidColorPage({super.key});
@@ -25,9 +25,9 @@ class _SolidColorPageState extends State<SolidColorPage> {
       child: Scaffold(
         backgroundColor: themeColor,
         appBar: AppBar(
-          title: const Text('RGB controller'),
+          title: const Text(header),
           centerTitle: true,
-          backgroundColor: Colors.blueGrey,
+          backgroundColor: accentColor,
           automaticallyImplyLeading: false,
         ),
         body: SizedBox(
@@ -85,7 +85,7 @@ class _SolidColorPageState extends State<SolidColorPage> {
           ),
         ),
         bottomNavigationBar: BottomNavigationBar(
-          backgroundColor: Colors.blueGrey,
+          backgroundColor: accentColor,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           type: BottomNavigationBarType.fixed,

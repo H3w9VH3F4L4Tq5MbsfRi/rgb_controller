@@ -1,14 +1,13 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:http/http.dart' as http;
+
+import 'package:rgb_controller/devices.dart';
 import 'package:rgb_controller/globals.dart';
 import 'package:rgb_controller/sequence.dart';
 import 'package:rgb_controller/solid_color.dart';
-import 'package:http/http.dart' as http;
-
-import 'devices.dart';
 
 class MusicPage extends StatefulWidget {
   const MusicPage({super.key});
@@ -32,7 +31,7 @@ class _MusicPageState extends State<MusicPage> {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'Authorization':
-        'Bearer BQBCetW0yXv8EHHlaUzY6TxWXK7sIdyvcIOE2hynH8wcFEBiZTHwui8VXl5PxITKbCR5Si4PG9fKZyaXv3GLFg0Us-71P6Uhusqv-4v9lsb5Ik1cAblqKR_F5qWOfJ4K4KquyF4HpAzQ1g4FBG5-0y-d7OgT6rJl_yhmDenS7TmM04o'
+        'Bearer BQA44EBcjdWze3qOmf0JUjM8sVIk0wBt6T6CArvoCo8hpoC6C0WLFsdFDPTq3GXjiSOjlGo-0Y8ZEWSmudJulXA9wIwsAoKt0SAjL2y1uRxAh5x-37ivh8rAeWbP-V0LHagrPWV-PxHH5Mkn5J6Xv_WZbDW61sO9TI7QA-VmMBwX4WU'
   };
   String title = '';
   String albumName = '';
@@ -50,6 +49,8 @@ class _MusicPageState extends State<MusicPage> {
     );
   }
 
+  void apiCommunication() {}
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -57,9 +58,9 @@ class _MusicPageState extends State<MusicPage> {
         child: Scaffold(
           backgroundColor: themeColor,
           appBar: AppBar(
-            title: const Text('RGB controller'),
+            title: const Text(header),
             centerTitle: true,
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: accentColor,
             automaticallyImplyLeading: false,
           ),
           body: SizedBox(
@@ -274,7 +275,7 @@ class _MusicPageState extends State<MusicPage> {
             ),
           ),
           bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Colors.blueGrey,
+            backgroundColor: accentColor,
             showSelectedLabels: false,
             showUnselectedLabels: false,
             type: BottomNavigationBarType.fixed,
