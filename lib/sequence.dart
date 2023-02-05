@@ -14,13 +14,16 @@ class SequencePage extends StatefulWidget {
 }
 
 class _SequencePageState extends State<SequencePage> {
+  static const int currIndex = 1;
   String setButtonText = "Set created sequence";
-  List<int> times = List.generate(0, (index) => index, growable: true);
+  List<int> times = [];
 
   void addTime(int time) {
-    setState(() {
-      times.add(time);
-    });
+    setState(
+      () {
+        times.add(time);
+      },
+    );
   }
 
   @override
@@ -52,12 +55,6 @@ class _SequencePageState extends State<SequencePage> {
                       width: double.infinity,
                       child: Column(
                         children: [
-                          const Text(
-                            'Enter duration of new segment in ms: ',
-                            style: TextStyle(
-                              fontSize: 20,
-                            ),
-                          ),
                           MyCustomForm(
                             funkcja: addTime,
                           ),
@@ -73,7 +70,7 @@ class _SequencePageState extends State<SequencePage> {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: times.length > 0
+                            child: times.isNotEmpty
                                 ? ListView.builder(
                                     scrollDirection: Axis.vertical,
                                     shrinkWrap: true,
@@ -116,11 +113,13 @@ class _SequencePageState extends State<SequencePage> {
                         await Future.delayed(const Duration(seconds: 2));
                         // ignore: use_build_context_synchronously
                         context.loaderOverlay.hide();
-                        setState(() {
-                          currentState = 'Sequence';
-                          currColor = Colors.black;
-                          setButtonText = 'Success!';
-                        });
+                        setState(
+                          () {
+                            currentState = 'Sequence';
+                            currColor = Colors.black;
+                            setButtonText = 'Success!';
+                          },
+                        );
                       },
                       child: Text(setButtonText),
                     ),
@@ -155,40 +154,41 @@ class _SequencePageState extends State<SequencePage> {
             ],
             currentIndex: currIndex,
             onTap: (value) {
-              setState(() {
-                currIndex = value;
-                switch (value) {
-                  case 0:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SolidColorPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  case 2:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const MusicPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  case 3:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const DevicesPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  default:
-                    break;
-                }
-              });
+              setState(
+                () {
+                  switch (value) {
+                    case 0:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SolidColorPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 2:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const MusicPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 3:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const DevicesPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    default:
+                      break;
+                  }
+                },
+              );
             },
           ),
         ),
@@ -220,6 +220,9 @@ class MyCustomFormState extends State<MyCustomForm> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
+            decoration: const InputDecoration(
+              labelText: "Enter duration of new segment in ms",
+            ),
             validator: (value) {
               if (value == null ||
                   value.isEmpty ||

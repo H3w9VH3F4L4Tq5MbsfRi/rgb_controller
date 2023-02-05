@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rgb_controller/solid_color.dart';
+import 'package:rgb_controller/devices.dart';
 
 void main() {
   runApp(const RGBControllerApp());
@@ -16,7 +16,7 @@ class _RGBControllerAppState extends State<RGBControllerApp> {
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: SolidColorPage(),
+      home: DevicesPage(),
     );
   }
 }

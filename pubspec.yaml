@@ -40,6 +40,8 @@ dependencies:
   internet_connection_checker: ^1.0.0+1
   connectivity_plus: ^3.0.2
   http: ^0.13.5
+  lan_scanner: ^3.5.0
+  network_info_plus: ^3.0.1
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
@@ -19,8 +18,9 @@ class MusicPage extends StatefulWidget {
 }
 
 class _MusicPageState extends State<MusicPage> {
+  static const int currIndex = 2;
   String setButtonText = "Start flashing to music";
-  String checkText = "Check for internet connection";
+  String checkText = "Test internet connection to access online features";
   bool showOnline = false;
   String search = '';
   bool searched = false;
@@ -32,7 +32,7 @@ class _MusicPageState extends State<MusicPage> {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
     'Authorization':
-        'Bearer BQBSbz-GJ9qmo2osof4ZV_r9V1ZEXDdv-hNJVoWPPd50baJ-9kVvGCv7n8xIcwprHnYYt724i7iGgz1IVZwcSEPhZ1rv-Yr1qMm05AnyLTU7Jubutx1hKjXCdeNzwxJqo19rwaJl2_He1USwxSYh6_tkPfuyei7hcVWzfcLtLj9wwdQ'
+        'Bearer BQDXPSuvcFgLM-khftiDv1Omn8porAcGO6fxAuIi02X8Q1l8OdYfVpilg3VwSIA6Nvjto9AR8Z9lob70TL2V-OOeTl9_sHr_83y-6jA_MMJ1PU79XRl0CnSaGfdTnMG0r-ys2TVjPFJxE1K0uFcBsTmEKUmLA_Lv1jhcitN8keVcBAk'
   };
   String title = '';
   String albumName = '';
@@ -41,10 +41,13 @@ class _MusicPageState extends State<MusicPage> {
   double bmp = -1;
 
   void setFun() {
-    setState(() {
-      currentState = 'Flashing to music';
-      currColor = Colors.black;
-    });
+    setState(
+      () {
+        currentState = 'Flashing to music';
+        currColor = Colors.black;
+        setButtonText = "Start flashing to music";
+      },
+    );
   }
 
   @override
@@ -83,12 +86,6 @@ class _MusicPageState extends State<MusicPage> {
                               color: Colors.grey,
                             ),
                           ),
-                          const Text(
-                            'Enter desired BMP: ',
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
-                          ),
                           MyCustomForm2(funkcja: setFun),
                           const Divider(
                             color: Colors.black,
@@ -100,15 +97,17 @@ class _MusicPageState extends State<MusicPage> {
                               onPressed: () async {
                                 bool result = await InternetConnectionChecker()
                                     .hasConnection;
-                                setState(() {
-                                  if (result) {
-                                    checkText = 'Connected';
-                                    showOnline = true;
-                                  } else {
-                                    checkText = 'Disconnected :( Try again';
-                                    showOnline = false;
-                                  }
-                                });
+                                setState(
+                                  () {
+                                    if (result) {
+                                      checkText = 'Connected';
+                                      showOnline = true;
+                                    } else {
+                                      checkText = 'Disconnected :( Try again';
+                                      showOnline = false;
+                                    }
+                                  },
+                                );
                               },
                               child: Text(checkText),
                             ),
@@ -130,67 +129,74 @@ class _MusicPageState extends State<MusicPage> {
                               color: Colors.grey,
                             ),
                           ),
-                          const Text(
-                            'Type name and author of the song: ',
-                            style: TextStyle(
-                              fontSize: 15,
-                            ),
-                          ),
                           TextField(
+                            decoration: const InputDecoration(
+                              labelText: "Enter name and author of the song",
+                            ),
                             onChanged: (value) {
                               search = value;
                             },
                           ),
                           ElevatedButton(
                             onPressed: () async {
-                              FocusManager.instance.primaryFocus?.unfocus();
-                              final response = await http.get(
-                                  Uri.parse(
-                                      'https://spotify23.p.rapidapi.com/search/?q=$search&type=tracks&offset=0&limit=1&numberOfTopResults=1'),
-                                  headers: header1);
-                              if (response.statusCode == 200) {
-                                Map<String, dynamic> data =
-                                    jsonDecode(response.body);
-                                Map<String, dynamic> data2 = data['tracks'];
-                                List<dynamic> data3 = data2['items'];
-                                Map<String, dynamic> data4 = data3[0];
-                                Map<String, dynamic> data5 = data4['data'];
-                                String id = data5['id'];
-                                title = data5['name'];
-                                Map<String, dynamic> data6 =
-                                    data5['albumOfTrack'];
-                                albumName = data6['name'];
-                                Map<String, dynamic> data7 = data6['coverArt'];
-                                List<dynamic> data8 = data7['sources'];
-                                Map<String, dynamic> data9 = data8[1];
-                                cover64 = data9['url'];
-                                Map<String, dynamic> data10 = data5['artists'];
-                                List<dynamic> data11 = data10['items'];
-                                Map<String, dynamic> data12 = data11[0];
-                                Map<String, dynamic> data13 = data12['profile'];
-                                artist = data13['name'];
-
-                                final response2 = await http.get(
+                              if (search.isNotEmpty) {
+                                setState(() {
+                                  setButtonText = "Start flashing to music";
+                                });
+                                FocusManager.instance.primaryFocus?.unfocus();
+                                final response = await http.get(
                                     Uri.parse(
-                                        'https://api.spotify.com/v1/audio-analysis/$id'),
-                                    headers: header2);
-                                if (response2.statusCode == 200) {
-                                  Map<String, dynamic> tada =
-                                      jsonDecode(response2.body);
-                                  Map<String, dynamic> tada2 = tada['track'];
-                                  bmp = tada2['tempo'];
-                                  setState(
-                                    () {
-                                      searched = true;
-                                    },
-                                  );
+                                        'https://spotify23.p.rapidapi.com/search/?q=$search&type=tracks&offset=0&limit=1&numberOfTopResults=1'),
+                                    headers: header1);
+                                if (response.statusCode == 200) {
+                                  Map<String, dynamic> data =
+                                      jsonDecode(response.body);
+                                  Map<String, dynamic> data2 = data['tracks'];
+                                  List<dynamic> data3 = data2['items'];
+                                  Map<String, dynamic> data4 = data3[0];
+                                  Map<String, dynamic> data5 = data4['data'];
+                                  String id = data5['id'];
+                                  title = data5['name'];
+                                  Map<String, dynamic> data6 =
+                                      data5['albumOfTrack'];
+                                  albumName = data6['name'];
+                                  Map<String, dynamic> data7 =
+                                      data6['coverArt'];
+                                  List<dynamic> data8 = data7['sources'];
+                                  Map<String, dynamic> data9 = data8[1];
+                                  cover64 = data9['url'];
+                                  Map<String, dynamic> data10 =
+                                      data5['artists'];
+                                  List<dynamic> data11 = data10['items'];
+                                  Map<String, dynamic> data12 = data11[0];
+                                  Map<String, dynamic> data13 =
+                                      data12['profile'];
+                                  artist = data13['name'];
+
+                                  final response2 = await http.get(
+                                      Uri.parse(
+                                          'https://api.spotify.com/v1/audio-analysis/$id'),
+                                      headers: header2);
+                                  if (response2.statusCode == 200) {
+                                    Map<String, dynamic> tada =
+                                        jsonDecode(response2.body);
+                                    Map<String, dynamic> tada2 = tada['track'];
+                                    bmp = tada2['tempo'];
+                                    setState(
+                                      () {
+                                        searched = true;
+                                      },
+                                    );
+                                  } else {
+                                    // ignore: use_build_context_synchronously
+                                    errorPopUp(
+                                        jsonDecode(response2.body), context);
+                                  }
                                 } else {
-                                  // ignore: avoid_print
-                                  print(jsonDecode(response2.body));
+                                  // ignore: use_build_context_synchronously
+                                  errorPopUp(
+                                      jsonDecode(response.body), context);
                                 }
-                              } else {
-                                // ignore: avoid_print
-                                print(jsonDecode(response.body));
                               }
                             },
                             child: const Center(
@@ -208,6 +214,8 @@ class _MusicPageState extends State<MusicPage> {
                                   ),
                                 ),
                                 Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Image.network(cover64),
                                     Center(
@@ -218,7 +226,7 @@ class _MusicPageState extends State<MusicPage> {
                                         ],
                                       ),
                                     ),
-                                    Text('BMP: $bmp'),
+                                    Text('BPM: $bmp'),
                                   ],
                                 ),
                                 SizedBox(
@@ -227,7 +235,8 @@ class _MusicPageState extends State<MusicPage> {
                                     onPressed: () async {
                                       context.loaderOverlay.show();
                                       await Future.delayed(
-                                          const Duration(seconds: 2));
+                                        const Duration(seconds: 2),
+                                      );
                                       // ignore: use_build_context_synchronously
                                       context.loaderOverlay.hide();
                                       setState(
@@ -238,9 +247,6 @@ class _MusicPageState extends State<MusicPage> {
                                         },
                                       );
                                     },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.black,
-                                    ),
                                     child: Text(setButtonText),
                                   ),
                                 ),
@@ -281,40 +287,41 @@ class _MusicPageState extends State<MusicPage> {
             ],
             currentIndex: currIndex,
             onTap: (value) {
-              setState(() {
-                currIndex = value;
-                switch (value) {
-                  case 0:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SolidColorPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  case 1:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SequencePage(),
-                        ),
-                      );
-                    }
-                    break;
-                  case 3:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const DevicesPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  default:
-                    break;
-                }
-              });
+              setState(
+                () {
+                  switch (value) {
+                    case 0:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SolidColorPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 1:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SequencePage(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 3:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const DevicesPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    default:
+                      break;
+                  }
+                },
+              );
             },
           ),
         ),
@@ -344,6 +351,9 @@ class MyCustomForm2State extends State<MyCustomForm2> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           TextFormField(
+            decoration: const InputDecoration(
+              labelText: "Enter desired BPM",
+            ),
             validator: (value) {
               if (value == null ||
                   value.isEmpty ||
@@ -372,4 +382,45 @@ class MyCustomForm2State extends State<MyCustomForm2> {
       ),
     );
   }
+}
+
+class DialogExample extends StatelessWidget {
+  final String errorCode;
+  const DialogExample({super.key, required this.errorCode});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('API connection error'),
+          content: Text(errorCode),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
+      child: const Text('Show Dialog'),
+    );
+  }
+}
+
+void errorPopUp(String errorMessage, BuildContext context) {
+  showDialog<String>(
+    context: context,
+    builder: (BuildContext context) => AlertDialog(
+      title: const Text('API connection error'),
+      content: Text(errorMessage),
+      actions: <Widget>[
+        TextButton(
+          onPressed: () => Navigator.pop(context, 'OK'),
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
 }

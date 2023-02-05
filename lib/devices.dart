@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:rgb_controller/globals.dart';
 import 'package:rgb_controller/sequence.dart';
 import 'package:rgb_controller/solid_color.dart';
+import 'package:lan_scanner/lan_scanner.dart';
 
 import 'music.dart';
 
@@ -14,7 +16,28 @@ class DevicesPage extends StatefulWidget {
 }
 
 class _DevicesPageState extends State<DevicesPage> {
-  String setButtonText = "Connect to devices";
+  static const int currIndex = 3;
+  String setButtonText = "Scan network for avaible devices";
+  bool devicesVisibility = false;
+  List<String> devices = [];
+  String baner = 'Avaible devices: ';
+  int devicesCount = 0;
+
+  void changeConnectedCount(bool newState) {
+    if (newState) {
+      setState(
+        () {
+          devicesCount++;
+        },
+      );
+    } else {
+      setState(
+        () {
+          devicesCount--;
+        },
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +57,7 @@ class _DevicesPageState extends State<DevicesPage> {
               child: Column(
                 children: [
                   AppBar(
-                    title: Text(currentState),
+                    title: Text('$devicesCount devices connected'),
                     centerTitle: true,
                     backgroundColor: currColor,
                     automaticallyImplyLeading: false,
@@ -43,40 +66,63 @@ class _DevicesPageState extends State<DevicesPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () async {
-                        context.loaderOverlay.show();
-                        await Future.delayed(const Duration(seconds: 2));
-                        // ignore: use_build_context_synchronously
-                        context.loaderOverlay.hide();
-                        setState(() {
-                          currentState = 'Sequence';
-                          currColor = Colors.black;
-                          setButtonText = 'Success!';
-                        });
+                        setState(
+                          () {
+                            devices = [];
+                            devicesCount = 0;
+                          },
+                        );
+
+                        var wifiIP = await (NetworkInfo().getWifiIP());
+                        var subnet = ipToCSubnet(wifiIP!);
+                        final scanner = LanScanner();
+                        final stream = scanner.icmpScan(subnet);
+                        stream.listen(
+                          (HostModel device) {
+                            setState(
+                              () {
+                                devices.add(device.ip);
+                              },
+                            );
+                          },
+                        );
+                        setState(
+                          () {
+                            currColor = Colors.black;
+                            devicesVisibility = true;
+                          },
+                        );
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                      ),
                       child: Text(setButtonText),
                     ),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        context.loaderOverlay.show();
-                        await Future.delayed(const Duration(seconds: 2));
-                        // ignore: use_build_context_synchronously
-                        context.loaderOverlay.hide();
-                        setState(() {
-                          currentState = 'Sequence';
-                          currColor = Colors.black;
-                          setButtonText = 'Success!';
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                      ),
-                      child: Text(setButtonText),
+                  Visibility(
+                    visible: devicesVisibility,
+                    child: Column(
+                      children: [
+                        Text(
+                          baner,
+                          style: const TextStyle(
+                            fontSize: 20,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: devices.isNotEmpty
+                              ? ListView.builder(
+                                  scrollDirection: Axis.vertical,
+                                  shrinkWrap: true,
+                                  itemCount: devices.length,
+                                  itemBuilder: (context, index) {
+                                    return SeqListElem2(
+                                      child: devices[index],
+                                      funkcja: changeConnectedCount,
+                                    );
+                                  },
+                                )
+                              : const Text('Empty'),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -109,44 +155,73 @@ class _DevicesPageState extends State<DevicesPage> {
             ],
             currentIndex: currIndex,
             onTap: (value) {
-              setState(() {
-                currIndex = value;
-                switch (value) {
-                  case 0:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SolidColorPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  case 1:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const SequencePage(),
-                        ),
-                      );
-                    }
-                    break;
-                  case 2:
-                    {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const MusicPage(),
-                        ),
-                      );
-                    }
-                    break;
-                  default:
-                    break;
-                }
-              });
+              setState(
+                () {
+                  switch (value) {
+                    case 0:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SolidColorPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 1:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const SequencePage(),
+                          ),
+                        );
+                      }
+                      break;
+                    case 2:
+                      {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const MusicPage(),
+                          ),
+                        );
+                      }
+                      break;
+                    default:
+                      break;
+                  }
+                },
+              );
             },
           ),
         ),
       ),
+    );
+  }
+}
+
+class SeqListElem2 extends StatefulWidget {
+  final String child;
+  final void Function(bool) funkcja;
+  const SeqListElem2({super.key, required this.child, required this.funkcja});
+
+  @override
+  State<SeqListElem2> createState() => _SeqListElem2State();
+}
+
+class _SeqListElem2State extends State<SeqListElem2> {
+  bool state = false;
+  @override
+  Widget build(BuildContext context) {
+    return CheckboxListTile(
+      title: Text('IP: ${widget.child}'),
+      value: state,
+      onChanged: (bool? newValue) {
+        setState(
+          () {
+            state = newValue!;
+          },
+        );
+        widget.funkcja(newValue!);
+      },
     );
   }
 }

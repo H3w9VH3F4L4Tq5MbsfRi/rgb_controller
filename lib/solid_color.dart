@@ -15,6 +15,7 @@ class SolidColorPage extends StatefulWidget {
 }
 
 class _SolidColorPageState extends State<SolidColorPage> {
+  static const int currIndex = 0;
   Color pickedColor = Colors.red;
   String setButtonText = "Set selected color";
 
@@ -61,11 +62,13 @@ class _SolidColorPageState extends State<SolidColorPage> {
                       await Future.delayed(const Duration(seconds: 2));
                       // ignore: use_build_context_synchronously
                       context.loaderOverlay.hide();
-                      setState(() {
-                        currentState = 'Solid color';
-                        setButtonText = 'Success!';
-                        currColor = pickedColor;
-                      });
+                      setState(
+                        () {
+                          currentState = 'Solid color';
+                          setButtonText = 'Success!';
+                          currColor = pickedColor;
+                        },
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: pickedColor,
@@ -103,40 +106,41 @@ class _SolidColorPageState extends State<SolidColorPage> {
           ],
           currentIndex: currIndex,
           onTap: (value) {
-            setState(() {
-              currIndex = value;
-              switch (value) {
-                case 1:
-                  {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const SequencePage(),
-                      ),
-                    );
-                  }
-                  break;
-                case 2:
-                  {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const MusicPage(),
-                      ),
-                    );
-                  }
-                  break;
-                case 3:
-                  {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const DevicesPage(),
-                      ),
-                    );
-                  }
-                  break;
-                default:
-                  break;
-              }
-            });
+            setState(
+              () {
+                switch (value) {
+                  case 1:
+                    {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const SequencePage(),
+                        ),
+                      );
+                    }
+                    break;
+                  case 2:
+                    {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const MusicPage(),
+                        ),
+                      );
+                    }
+                    break;
+                  case 3:
+                    {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const DevicesPage(),
+                        ),
+                      );
+                    }
+                    break;
+                  default:
+                    break;
+                }
+              },
+            );
           },
         ),
       ),
