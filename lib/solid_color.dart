@@ -4,6 +4,9 @@ import 'package:loader_overlay/loader_overlay.dart';
 import 'package:rgb_controller/globals.dart';
 import 'package:rgb_controller/sequence.dart';
 
+import 'devices.dart';
+import 'music.dart';
+
 class SolidColorPage extends StatefulWidget {
   const SolidColorPage({super.key});
 
@@ -114,12 +117,20 @@ class _SolidColorPageState extends State<SolidColorPage> {
                   break;
                 case 2:
                   {
-                    print('dupa2');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const MusicPage(),
+                      ),
+                    );
                   }
                   break;
                 case 3:
                   {
-                    print('dupa3');
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DevicesPage(),
+                      ),
+                    );
                   }
                   break;
                 default:

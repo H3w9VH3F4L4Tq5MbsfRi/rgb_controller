@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:loader_overlay/loader_overlay.dart';
+import 'package:rgb_controller/devices.dart';
 import 'package:rgb_controller/globals.dart';
 import 'package:rgb_controller/solid_color.dart';
+
+import 'music.dart';
 
 class SequencePage extends StatefulWidget {
   const SequencePage({super.key});
@@ -36,6 +39,63 @@ class _SequencePageState extends State<SequencePage> {
                     backgroundColor: currColor,
                     automaticallyImplyLeading: false,
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Enter duration of new segment in ms: ',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                          const MyCustomForm(),
+                          const Divider(
+                            color: Colors.black,
+                            thickness: 2,
+                          ),
+                          const Text(
+                            'Current sequence: ',
+                            style: TextStyle(
+                              fontSize: 20,
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: times.length > 0
+                                ? ListView.builder(
+                                    scrollDirection: Axis.vertical,
+                                    shrinkWrap: true,
+                                    itemCount: times.length,
+                                    itemBuilder: (context, index) {
+                                      return SeqListElem(
+                                        child: times[index],
+                                        indx: index,
+                                      );
+                                    },
+                                  )
+                                : const Text('Empty'),
+                          ),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                times = List.generate(0, (index) => index,
+                                    growable: true);
+                              },
+                              child: const Text('Clear sequence'),
+                            ),
+                          ),
+                          const Divider(
+                            color: Colors.black,
+                            thickness: 2,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -50,9 +110,6 @@ class _SequencePageState extends State<SequencePage> {
                           setButtonText = 'Success!';
                         });
                       },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                      ),
                       child: Text(setButtonText),
                     ),
                   ),
@@ -100,12 +157,20 @@ class _SequencePageState extends State<SequencePage> {
                     break;
                   case 2:
                     {
-                      print('dupa2');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const MusicPage(),
+                        ),
+                      );
                     }
                     break;
                   case 3:
                     {
-                      print('dupa3');
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const DevicesPage(),
+                        ),
+                      );
                     }
                     break;
                   default:
@@ -114,6 +179,89 @@ class _SequencePageState extends State<SequencePage> {
               });
             },
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class MyCustomForm extends StatefulWidget {
+  const MyCustomForm({super.key});
+
+  @override
+  MyCustomFormState createState() {
+    return MyCustomFormState();
+  }
+}
+
+class MyCustomFormState extends State<MyCustomForm> {
+  final _formKey = GlobalKey<FormState>();
+  int time = -1;
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          TextFormField(
+            validator: (value) {
+              if (value == null ||
+                  value.isEmpty ||
+                  int.tryParse(value) == null ||
+                  int.parse(value) <= 0) {
+                return 'Invalid input';
+              } else {
+                time = int.parse(value);
+              }
+              return null;
+            },
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  FocusManager.instance.primaryFocus?.unfocus();
+                  setState(() {
+                    times.add(time);
+                  });
+                }
+              },
+              child: const Center(
+                child: Text('Add'),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class SeqListElem extends StatelessWidget {
+  final int child;
+  final int indx;
+
+  // ignore: use_key_in_widget_constructors
+  const SeqListElem({required this.child, required this.indx});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: indx % 2 == 0 ? Colors.white : Colors.black,
+        border: Border.all(
+          color: Colors.black,
+          width: 2,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          '$child ms',
+          style: TextStyle(color: indx % 2 == 0 ? Colors.black : Colors.white),
         ),
       ),
     );
